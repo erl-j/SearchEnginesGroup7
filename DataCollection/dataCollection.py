@@ -20,13 +20,15 @@ class Post:
         )
         comments = r.json()
         op = comments.pop(0)
-        if len(comments)>0 and len(comments[0]['data']['children'])>0:
+        try:
             self.answer = comments[0]['data']['children'][0]['data']['body']
             i=1
             while "I am a bot" in self.answer or "[removed]" == self.answer:
                 self.answer = comments[0]['data']['children'][i]['data']['body']
                 i+=1
             self.answer = self.answer.replace('\n', ' ')
+        except:
+            print("failed")
 
     def getQuestion(self):
         return self.question
