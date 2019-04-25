@@ -5,37 +5,16 @@
 from elasticsearch import Elasticsearch 
 from elasticsearch_dsl import Search
 import io
+import json
 
-questions = {}
-answers = {}
-
-def getQuestionsFromFile():
-  file = io.open("DataCollection/questions.txt", "r", encoding="utf-8") 
   
-  for l in file.readlines():
-    numAndString = l.split(' ', 1)
-    num = int(numAndString[0])
-    string = numAndString[1]
-    questions[num] = string
   
-def getAnswersFromFile():
-  file = io.open("DataCollection/answers.txt", "r")
-  
-  for l in file.readlines():
-    numAndString = l.split(' ', 1)
-    num = int(numAndString[0])
-    string = numAndString[1]
-    answers[num] = string
-  
-getAnswersFromFile()
-getQuestionsFromFile()
-
 es=Elasticsearch([{'host':'localhost','port':9200}])
-for id in questions.keys():
-  entry={
-    "question": questions[id],
-    "answer": answers[id],
-  }
-  es.index(index='eli',doc_type='question',id=id,body=entry)
 
+# Make sure we start with a clean index
+es.indices.delete(index='eli')
 
+file = io.open("DataCollection/NodeScraper/QA.json")
+data = json.load(file)
+for obj in data['data']:
+  es.index(index='eli',doc_type='question',body=obj)
