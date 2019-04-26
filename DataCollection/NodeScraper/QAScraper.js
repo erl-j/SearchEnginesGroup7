@@ -16,9 +16,9 @@ const endTime = 1556039583;
 let spanStart = startTime;
 const secondsInAShift = 60 * 60 * 24;
 
-const batchSize = 10;
+const batchSize = 100;
 
-var stream = fs.createWriteStream("QA5.json", {flags:'a'});
+var stream = fs.createWriteStream("QA6.json", {flags:'a'});
 
 
 setInterval(
@@ -31,7 +31,7 @@ setInterval(
 		fetch(submissionUrl(spanStart, spanStart + secondsInAShift, batchSize))
 			.then(res => res.json())
 			.then(body => {
-				body.data.forEach(post=>
+				body.data.slice(0,10).forEach(post=>
 				fetch(commentUrl(post.id))
 				.then(res2=>res2.json())
 				.then(body2=>{
@@ -57,7 +57,7 @@ setInterval(
 			}).catch(e=>"failed to get posts")
 		}
 			,
-	1000
+	5000
 );
 
 
