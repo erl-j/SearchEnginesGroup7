@@ -1,11 +1,11 @@
 var fetch = require('node-fetch');
 
 const submissionUrl = (afterTime, beforeTime, size) => {
-	return `https://api.pushshift.io/reddit/search/submission/?size=${size}&subreddit=explainlikeimfive&before=${beforeTime}&after=${afterTime}&num_comments>=5&sortType=score&sort=desc`;
+	return `https://api.pushshift.io/reddit/search/submission/?size=${size}&subreddit=explainlikeimfive&before=${beforeTime}&after=${afterTime}&num_comments>=5&sort_type=score&sort=desc&user_removed=false&mod_removed=false`;
 };
 
 const commentUrl = subId => {
-	return `https://api.pushshift.io/reddit/comment/search?size=10&link_id=${subId}&sortType=score&sort=desc`;
+	return `https://api.pushshift.io/reddit/comment/search?size=100&link_id=${subId}&sort_type=score&sort=desc&user_removed=false&mod_removed=false`;
 };
 
 var fs = require('fs');
@@ -18,46 +18,58 @@ const secondsInAShift = 60 * 60 * 24;
 
 const batchSize = 100;
 
-var stream = fs.createWriteStream("QA6.json", {flags:'a'});
+var stream = fs.createWriteStream('QA8.json', { flags: 'a' });
 
-
-setInterval(
-	() =>{
-		if(spanStart>endTime){
-			throw new Error();
-		}
-		spanStart += secondsInAShift;
-		console.log(spanStart);
-		fetch(submissionUrl(spanStart, spanStart + secondsInAShift, batchSize))
-			.then(res => res.json())
-			.then(body => {
-				body.data.slice(0,10).forEach(post=>
+setInterval(() => {
+	if (spanStart > endTime) {
+		throw new Error();
+	}
+	spanStart += secondsInAShift;
+	console.log(spanStart);
+	fetch(submissionUrl(spanStart, spanStart + secondsInAShift, batchSize))
+		.then(res => res.json())
+		.then(body => {
+			body.data.slice(0, 100).forEach(post => {
+				if (post.self_text == '[deleted]' || post.self_text == '[deleted]') {
+					return 0;
+				}
 				fetch(commentUrl(post.id))
-				.then(res2=>res2.json())
-				.then(body2=>{
-					if(body2.data.length>0){
-						var comment=body2.data.find(c=>c.parent_id.substring(0,2)=="t3");
-						if(comment){
-							var QA={"title":post.title, "question_detail":post.selftext,"answer":comment.body};
-							stream.write(JSON.stringify(QA)+",\n",()=>console.log("success!"));
+					.then(res2 => res2.json())
+					.then(body2 => {
+						if (body2.data.length > 0) {
+							var comment = body2.data.sort((a,b)=>b.score-a.score).find(c => c.parent_id.substring(0, 2) == 't3');
+							if (
+								comment &&
+								comment.body != '[deleted]' &&
+								comment.body != '[removed]' &&
+								comment.author != 'AutoModerator'
+							) {
+								var QA = {
+									title: post.title,
+									question_detail: post.selftext,
+									date: post.created_utc,
+									post_score: post.score,
+									num_comments: post.num_comments,
+									full_link: post.full_link,
+									flair: post.flair,
+									over_18:post.over_18,
+									all_awardings:post.awards,
 
+									answer: {
+										text: comment.body,
+										author: comment.author,
+										date: comment.created_utc,
+										score: comment.score,
+										perma_link:comment.perma_link,
+										awards:comment.awards
+									},
+								};
+								stream.write(JSON.stringify(QA) + ',\n', () => console.log('success!'));
+							}
 						}
-						
-					}
-					
-				}).catch(e=>"failed to get comment")
-				)
-				
-				
-
-
-
-				
-
-			}).catch(e=>"failed to get posts")
-		}
-			,
-	5000
-);
-
-
+					})
+					.catch(e => 'failed to get comment');
+			});
+		})
+		.catch(e => 'failed to get posts');
+}, 5000);
