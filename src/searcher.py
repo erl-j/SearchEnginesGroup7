@@ -9,14 +9,37 @@ es=Elasticsearch([{'host':'localhost','port':9200}])
 
 query = raw_input("What would you like to search for? ")
 
-s = Search(using=es, index="eli") \
-    .query("match", title=query) \
+obj = {
+  "min_score": 7,
+  "query": {
+    "multi_match" : {
+      "query" : query,
+         "fields" : [ "title^3", "question_detail", "answer.text"] 
+      }
+    },
+  "rescore" : {
+    "query": {
+      "rescore_query": {
+        "function_score": {
+          "field_value_factor": { 
+            "field": "score_ratio",
+          },
+          "max_boost": 2
+        }
+      },
+      "query_weight" : 0.7,
+      "rescore_query_weight" : 10
+    }
+  }
+}
 
-response = s.execute()
 
-for hit in response:
-    print hit.meta.score
-    print hit.title.encode('utf-8')
-    if hasattr(hit, 'question_detail'):
-      print hit.question_detail.encode('utf-8')
-    print hit.answer.encode('utf-8')
+response = es.search(index="eli", body=obj)
+
+for hit in response['hits']['hits']:
+    print hit['_source']['answer']['text']
+    print hit['_source']['full_link']
+    print hit['_source']['post_score']
+    print hit['_source']['score_ratio']
+
+    bla = raw_input("ok")
