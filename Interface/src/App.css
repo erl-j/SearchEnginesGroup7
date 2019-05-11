@@ -1,0 +1,42 @@
+:root {
+  --text-color-A:rgb(52, 54, 52);
+  --text-color-B: black;
+}
+
+.App {
+  margin-top:10vh;
+  margin-left:10vw;
+  text-align: left;
+}
+
+h1{
+  font-size: 3rem;
+  font-family: 'Space Mono', monospace;
+  color:var(--text-color-A);
+}
+
+h2{
+  margin-top:1;
+  font-size: 2rem;
+  font-family: 'Space Mono', monospace;
+  color:var(--text-color-A);
+}
+#question {
+  font-family: 'Roboto Mono', monospace;
+  background: none;
+  width:70vw;
+  font-size:2rem;
+  color:var(--text-color-B);
+  border:none;
+  border-bottom:black;
+  border-bottom-style: solid;
+}
+
+#answer{
+  font-family: 'Roboto Mono', monospace;
+  background: none;
+  border: none;
+  width:70vw;
+  font-size:2rem;
+
+}
