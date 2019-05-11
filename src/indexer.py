@@ -7,14 +7,15 @@ from elasticsearch_dsl import Search
 import io
 import json
 
-  
-  
 es=Elasticsearch([{'host':'localhost','port':9200}])
 
 # Make sure we start with a clean index
-es.indices.delete(index='eli')
+try:
+  es.indices.delete(index='eli')
+except:
+  print("no index found")
 
-file = io.open("DataCollection/NodeScraper/QA8.json")
+file = io.open("../DataCollection/NodeScraper/QA8.json")
 data = json.load(file)
 for obj in data['data']:
   if obj.get('post_score', 0) == 0:

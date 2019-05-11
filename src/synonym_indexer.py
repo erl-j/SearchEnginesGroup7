@@ -12,7 +12,10 @@ import json
 es=Elasticsearch([{'host':'localhost','port':9200}])
 
 # Make sure we start with a clean index
-es.indices.delete(index='test')
+try:
+  es.indices.delete(index='test')
+except:
+  print("no index found")
 
 index_settings = {
   "settings" : {

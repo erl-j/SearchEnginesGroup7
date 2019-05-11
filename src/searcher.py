@@ -7,7 +7,7 @@ from elasticsearch_dsl import Search
 es=Elasticsearch([{'host':'localhost','port':9200}])
 
 
-query = raw_input("What would you like to search for? ")
+query = input("What would you like to search for? ")
 
 obj = {
   "min_score": 7,
@@ -37,9 +37,9 @@ obj = {
 response = es.search(index="eli", body=obj)
 
 for hit in response['hits']['hits']:
-    print hit['_source']['answer']['text']
-    print hit['_source']['full_link']
-    print hit['_source']['post_score']
-    print hit['_source']['score_ratio']
+    print (hit['_source']['answer']['text'])
+    print (hit['_source']['full_link'])
+    print (hit['_source']['post_score'])
+    print (hit['_source']['score_ratio'])
 
-    bla = raw_input("ok")
+    bla = input("ok")
