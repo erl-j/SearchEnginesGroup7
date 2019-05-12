@@ -2,6 +2,36 @@ import React from 'react';
 import './App.css';
 import Loader from './Loader';
 import QuerySelector from './QuerySelector';
+import * as elasticsearch from 'elasticsearch';
+
+const client = new elasticsearch.Client({
+	host: 'localhost:9200',
+	log: 'trace',
+});
+
+const body = (string, fieldMask) => {
+	let fields = [];
+	if (fieldMask.title) {
+		fields.push('title');
+	}
+	if (fieldMask.detail) {
+		fields.push('question_detail');
+	}
+	if (fieldMask.reply) {
+		fields.push('answer');
+	}
+
+	let body = {
+		query: {
+			multi_match: {
+				query: string,
+				fields: fields,
+			},
+		},
+	};
+
+	return body;
+};
 
 function App() {
 	const [question, setQuestion] = React.useState('Can dogs look up?');
@@ -9,30 +39,6 @@ function App() {
 	const [isLoading, setIsLoading] = React.useState(false);
 
 	const [settings, setSettings] = React.useState({ title: false, detail: false, reply: false });
-
-	const body = (string, fieldMask) => {
-		let fields = [];
-		if (fieldMask.title) {
-			fields.push('title');
-		}
-		if (fieldMask.detail) {
-			fields.push('question_detail');
-		}
-		if (fieldMask.reply) {
-			fields.push('answer');
-		}
-
-		let body = {
-			query: {
-				multi_match: {
-					query: {string},
-					fields: fields
-				},
-			}
-		};
-
-		return body;
-	};
 
 	const handleKeyPress = e => {
 		if (e.key === 'Enter') {
@@ -46,25 +52,19 @@ function App() {
 	};
 
 	const fetchAnswer = async question => {
-		// return fetch('http://localhost:9200/eli/_search', {
-		// 	body: JSON.stringify(body(question, settings)),
-		// 	headers: { 'Content-Type': 'application/json' },
-		// 	method: 'POST',
-		// 	mode: 'cors', // no-cors, cors, *same-origin
-		// 	cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-		// 	credentials: 'same-origin', // include, *same-origin, omit
-		// })
-		// 	.then(function(response) {
-		// 		return response.json();
-		// 	})
-		// 	.then(function(myJson) {
-		// 		console.log(JSON.stringify(myJson));
-		// 	});
-
-		console.log(question);
-		return new Promise((resolve, reject) => {
-			setTimeout(() => resolve('Maybe'), 1000);
+		const res = await client.search({
+			index: 'eli',
+			body: body(question, settings),
 		});
+
+		let ans;
+
+		try {
+			ans = res.hits.hits[0]._source.answer.text;
+		} catch (error) {
+			ans = "I don't know";
+		}
+		return ans;
 	};
 
 	return (
