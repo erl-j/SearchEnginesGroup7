@@ -74,7 +74,7 @@ const Main= ({toggleSidebar})=> {
 			<h1>ELI5 QA</h1>
 			<button onClick={toggleSidebar}>toggle sidebar</button>
 			<QuerySelector settings={settings} setSettings={setSettings} />
-			<QA setQuestion={setQuestion} answer={answer} isLoading={isLoading}></QA>
+			<QA setQuestion={setQuestion} answer={answer.length>900?answer+"...":answer} isLoading={isLoading}></QA>
 		</div>
 	);
 }
