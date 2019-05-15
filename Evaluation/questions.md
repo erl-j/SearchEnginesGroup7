@@ -12,5 +12,15 @@ Are macedonians slavs?
 Why can't some hybrid species like Ligers breed?
 Why are we tired in the morning after sleep?
 
-
-
+What caused earthquake?
+How is the mirage formed?
+What is the Tyndall effect?
+What are the effects of a geomagnetic storm?
+How Do Fireworks Get Their Glorious Colors?
+Why are there 7 days in a week?
+Why is the ocean salty?
+How come the stomach doesn't digest itself?
+What is the solar wind?
+What is the difference between a quantum and a photon？
+How to Grow Plants on Mars?
+Why Is It Hard to Wake up Every Morning?
