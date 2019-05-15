@@ -1,7 +1,7 @@
 var fetch = require('node-fetch');
 
-const submissionUrl = (afterTime, beforeTime, size) => {
-	return `https://api.pushshift.io/reddit/search/submission/?size=${size}&subreddit=explainlikeimfive&before=${beforeTime}&after=${afterTime}&num_comments>=5&sort_type=score&sort=desc&user_removed=false&mod_removed=false`;
+const submissionUrl = (subreddit,afterTime, beforeTime, size) => {
+	return `https://api.pushshift.io/reddit/search/submission/?size=${size}&subreddit=${subreddit}&before=${beforeTime}&after=${afterTime}&num_comments>=5&sort_type=score&sort=desc&user_removed=false&mod_removed=false`;
 };
 
 const commentUrl = subId => {
@@ -18,7 +18,9 @@ const secondsInAShift = 60 * 60 * 24;
 
 const batchSize = 100;
 
-var stream = fs.createWriteStream('QA8.json', { flags: 'a' });
+const sub="AskHistorians";
+
+var stream = fs.createWriteStream('QA'+sub+'.json', { flags: 'a' });
 
 setInterval(() => {
 	if (spanStart > endTime) {
@@ -26,7 +28,7 @@ setInterval(() => {
 	}
 	spanStart += secondsInAShift;
 	console.log(spanStart);
-	fetch(submissionUrl(spanStart, spanStart + secondsInAShift, batchSize))
+	fetch(submissionUrl(sub,spanStart, spanStart + secondsInAShift, batchSize))
 		.then(res => res.json())
 		.then(body => {
 			body.data.slice(0, 100).forEach(post => {

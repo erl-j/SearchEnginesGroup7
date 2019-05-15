@@ -1,88 +1,24 @@
-import React from 'react';
-import './App.css';
-import Loader from './Loader';
-import QuerySelector from './QuerySelector';
-import * as elasticsearch from 'elasticsearch';
+import * as React from 'react';
+import Main from './Main';
+import { Sidebar,Menu,Segment,Icon,Header,Image } from 'semantic-ui-react';
 
-const client = new elasticsearch.Client({
-	host: 'localhost:9200',
-	log: 'trace',
-});
 
-const body = (string, fieldMask) => {
-	let fields = [];
-	if (fieldMask.title) {
-		fields.push('title');
-	}
-	if (fieldMask.detail) {
-		fields.push('question_detail');
-	}
-	if (fieldMask.reply) {
-		fields.push('answer');
-	}
-
-	let body = {
-		query: {
-			multi_match: {
-				query: string,
-				fields: fields,
-			},
-		},
-	};
-
-	return body;
-};
-
-function App() {
-	const [question, setQuestion] = React.useState('Can dogs look up?');
-	const [answer, setAnswer] = React.useState('Yes but they have to sit down');
-	const [isLoading, setIsLoading] = React.useState(false);
-
-	const [settings, setSettings] = React.useState({ title: false, detail: false, reply: false });
-
-	const handleKeyPress = e => {
-		if (e.key === 'Enter') {
-			console.log('enter pressed');
-			setIsLoading(true);
-			fetchAnswer(question).then(a => {
-				setAnswer(a);
-				setIsLoading(false);
-			});
-		}
-	};
-
-	const fetchAnswer = async question => {
-		const res = await client.search({
-			index: 'eli',
-			body: body(question, settings),
-		});
-
-		let ans;
-
-		try {
-			ans = res.hits.hits[0]._source.answer.text;
-		} catch (error) {
-			ans = "I don't know";
-		}
-		return ans;
-	};
+const App = ({}) => {
+    const [isOpen,setOpen]=React.useState(false);
 
 	return (
-		<div className="App" onKeyPress={handleKeyPress}>
-			<h1>ELI5 QA</h1>
-			<QuerySelector settings={settings} setSettings={setSettings} />
-			<h2>Question:</h2>
-			<input id="question" onChange={e => setQuestion(e.target.value)} autoFocus />
-			<h2>Answer:</h2>
-			{isLoading ? (
-				<Loader />
-			) : (
-				<p id="answer" autoFocus>
-					{answer}
-				</p>
-			)}
-		</div>
+		<Sidebar.Pushable >
+			<Sidebar as={Menu} animation="overlay" icon="labeled" inverted vertical direction="top" visible={isOpen} width="thin">
+            <h1>Controls here</h1>
+			</Sidebar>
+
+			<Sidebar.Pusher>
+
+					<Main toggleSidebar={()=>setOpen(!isOpen)}></Main>
+
+			</Sidebar.Pusher>
+		</Sidebar.Pushable>
 	);
-}
+};
 
 export default App;
