@@ -1,11 +1,12 @@
 
 from gensim.test.utils import get_tmpfile
 from gensim.models import Word2Vec
+from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from gensim.utils import simple_preprocess
 import json
 import re
 
-# all files need to be in the same format as QA4.json
+
 def input(filenames):
     data = []
     for filename in filenames:
@@ -28,12 +29,24 @@ def preprocess(data):
         text.append(string)
     return text
 
+def doc_preprocess(data):
+    text = []
+    for i in range(len(data)):
+        string = data[i]['answer']['text']
+        string = clean(string)
+        word_list = simple_preprocess(string)
+        text.append(TaggedDocument(word_list, [i]))
+    return text
+
 if __name__ == '__main__':
 
     # load the trained model
     model = Word2Vec.load("./src/word2vec.model")
     vector = model.wv['blue']
     model.most_similar(['blue'])
+
+    doc_model = Doc2Vec.load("./src/doc2vec.model")
+    # doc_model.n_similarity(Q_seqlist, A_seqlist)
 
     ### training process
     '''
@@ -50,5 +63,13 @@ if __name__ == '__main__':
     #
     vector = model.wv['blue']
     model.most_similar(['blue'])
+
+    # doc2vec
+    filenames = ['QA8.json']
+    docs = input(filenames)
+    answers = doc_preprocess(docs)
+
+    doc_model = Doc2Vec(answers, vector_size=5, window=5, min_count=1, workers=4)
+    doc_model.save("doc2vec.model")
     '''
 
