@@ -18,7 +18,7 @@ const body = (string, fieldMask) => {
 		fields.push('question_detail');
 	}
 	if (fieldMask.reply) {
-		fields.push('answer');
+		fields.push('answer.text');
 	}
 
 	let body = {
@@ -26,8 +26,13 @@ const body = (string, fieldMask) => {
 			multi_match: {
 				query: string,
 				fields: fields,
+				operator: "or"
 			},
+
+			
 		},
+
+	
 	};
 
 	return body;
